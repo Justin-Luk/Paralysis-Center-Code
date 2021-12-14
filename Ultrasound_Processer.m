@@ -17,12 +17,3 @@ contourf(medIMG(:,:,1),v)
 set(gca,'xdir','normal','ydir','reverse')
 
 Area1=sum(medIMG(:,:,1)==38,'all')
-
-
-
-
-
-
-
-
-
