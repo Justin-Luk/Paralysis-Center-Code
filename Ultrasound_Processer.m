@@ -13,7 +13,9 @@ contourf(medIMG(:,:,1),v) % Cross section of contour plot
 set(gca,'xdir','normal','ydir','reverse') % Flip to orient it correctly 
 
 %The math
-Area1=sum(medIMG(:,:,1)==38,'all') % number of pixels at z=38 
+Area1=sum(medIMG(:,:,1)>37.688,'all') % number of pixels at z=37.688 
 B = 338*482; % Number of pixels in the picture
 Area2 = Area1 / B;  % Gives a percentage of the image that is colored
 Percent_Colored = Area2*100 
+blobs = 6;
+Average_Blob_Size = Area1/blobs
