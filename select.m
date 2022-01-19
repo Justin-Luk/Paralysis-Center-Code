@@ -53,11 +53,6 @@ while(1)
     % Create a binary image ("mask") from the ROI object.
     binaryImage = hFH.createMask();
     xy = hFH.getPosition;
-   
-   
-   % blacked = baseFileName;
-   %blacked = blacked(~binaryim) == 0; 
-    %numPix = sum(binaryImage(:))
 
     csvFileName = [baseFileNameNOext '_Mask' num2str(iter) '_xy.csv'];
     csvwrite([output_folder '\' csvFileName],xy)
@@ -105,13 +100,10 @@ while(1)
 
     %Finds the average value of the pixels in the freehanded section.
     %Adjusts for the fact that the background of maskedRgb is black
-    numPix = sum(binaryImage(:))
-    numPix2 = sum(~binaryImage(:))
-    totalPix = numPix + numPix2
-    meanraw = mean2(maskedRgbImage)
-    RgbPix = sum(maskedRgbImage(:))
-    meanval = ((mean2(maskedRgbImage)*(numPix + numPix2)))/(numPix)
-
+    numPix = sum(binaryImage(:));
+    numPix2 = sum(~binaryImage(:));
+    totalPix = numPix + numPix2;
+    meanval = ((mean2(maskedRgbImage)*(totalPix)))/(numPix)
 
     maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
     imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
