@@ -15,8 +15,8 @@ workspace;  % Make sure the workspace panel is showing.
 fontSize = 16;
 
 % Read in a standard MATLAB gray scale demo image.
-folder = fileparts(which('11.38.44 hrs __[0003131]copy.jpg')); % Determine where demo folder is (works with all versions).
-baseFileName = '11.38.44 hrs __[0003131]copy.jpg ';
+folder = fileparts(which('Screenshot 2022-01-18 150342.png')); % Determine where demo folder is (works with all versions).
+baseFileName = 'Screenshot 2022-01-18 150342.png ';
 
 baseFileNameNOext = baseFileName(1:(end-4));
 
@@ -53,6 +53,11 @@ while(1)
     % Create a binary image ("mask") from the ROI object.
     binaryImage = hFH.createMask();
     xy = hFH.getPosition;
+   
+   
+   % blacked = baseFileName;
+   %blacked = blacked(~binaryim) == 0; 
+    %numPix = sum(binaryImage(:))
 
     csvFileName = [baseFileNameNOext '_Mask' num2str(iter) '_xy.csv'];
     csvwrite([output_folder '\' csvFileName],xy)
@@ -85,24 +90,33 @@ while(1)
     greenChannel = rgbImage(:, :, 2);
     blueChannel = rgbImage(:, :, 3);
 
-    %meanval = mean2(maskedRgbImage)
-
     % Assign colors within each color channel individually.
-    redChannel(~binaryImage) = 255;
-    greenChannel(~binaryImage) = 255;
-    blueChannel(~binaryImage) = 255;
+    redChannel(~binaryImage) = 0;
+    greenChannel(~binaryImage) = 0;
+    blueChannel(~binaryImage) = 0;
+
     % Recombine separate masked color channels into a single, true color RGB image.
     maskedRgbImage = cat(3, redChannel, greenChannel, blueChannel);
-    
+
     burnedImage(~binaryImage) = 255;
     % Display the image with the mask "burned in."
     subplot(2, 2, 3);
     imshow(maskedRgbImage);
 
+    %Finds the average value of the pixels in the freehanded section.
+    %Adjusts for the fact that the background of maskedRgb is black
+    numPix = sum(binaryImage(:))
+    numPix2 = sum(~binaryImage(:))
+    totalPix = numPix + numPix2
+    meanraw = mean2(maskedRgbImage)
+    RgbPix = sum(maskedRgbImage(:))
+    meanval = ((mean2(maskedRgbImage)*(numPix + numPix2)))/(numPix)
+
+
     maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
     imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
     axis on;
-    caption = sprintf('Masked white outside the region');
+    caption = sprintf('Masked black outside the region');
     title(caption, 'FontSize', fontSize);
     
     choice = menu('Press yes no','Yes','No');
