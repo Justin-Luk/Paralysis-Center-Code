@@ -1,9 +1,3 @@
-% Demo to have the user freehand draw an irregular shape over a color image.
-% Then it creates a new image where the drawn region is all green inside the region and untouched outside the region,
-
-% Change the current folder to the folder of this m-file.
-
-
 if(~isdeployed)
   cd(fileparts(which(mfilename)));
 end
@@ -35,11 +29,12 @@ if ~exist(fullFileName, 'file')
 end
 rgbImage = imread(fullFileName);
 
-output_folder = 'C:\Users\justi\OneDrive\Documents\MATLAB\EMG';
+output_folder = 'C:\Users\justi\OneDrive\Documents\MATLAB\EMG/Matlab Ultrasound Pictures';
 
 iter = 0;
 while(1)
     iter = iter + 1;
+    T= datetime;
 
     imshow(rgbImage, []);
     axis on;
@@ -105,15 +100,25 @@ while(1)
     totalPix = numPix + numPix2;
     meanval = ((mean2(maskedRgbImage)*(totalPix)))/(numPix)
 
-    maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
-    imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
+        choice = menu('Press Subcutaneous tissue Muscle ','Subcutaneous tissue','Muscle');
+    if choice==2 | choice==0
+        maskFileName = [baseFileNameNOext '_SubCu'  num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
+        imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
+    
+    else
+         maskFileName = [baseFileNameNOext '_Muscle' num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
+         imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
+    end
+
+  %  maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
+   % imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
     axis on;
     caption = sprintf('Masked black outside the region');
     title(caption, 'FontSize', fontSize);
     
-    choice = menu('Press yes no','Yes','No');
+    choice = menu('Do you have more drawings?','Yes','No');
     if choice==2 | choice==0
        break;
     end
 end
-%close all;
+close all;
