@@ -1,7 +1,7 @@
 if(~isdeployed)
   cd(fileparts(which(mfilename)));
 end
-%clc;  % Clear command window.
+
 clear;  % Delete all variables.
 close all;  % Close all figure windows except those created by imtool.
 imtool close all;  % Close all figure windows created by imtool.
@@ -41,16 +41,10 @@ while(1)
     title('Original Color Image', 'FontSize', fontSize);
     set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
     
-    % Ask user to draw freehand mask.
-    %message = sprintf('Left click and hold to begin drawing.\nSimply lift the mouse button to finish');
-    %uiwait(msgbox(message));
     hFH = imfreehand(); % Actual line of code to do the drawing.
     % Create a binary image ("mask") from the ROI object.
     binaryImage = hFH.createMask();
     xy = hFH.getPosition;
-
-    csvFileName = [baseFileNameNOext '_Mask' num2str(iter) '_xy.csv'];
-    csvwrite([output_folder '\' csvFileName],xy)
     
     % Now make it smaller so we can show more images.
     subplot(2, 2, 1);
@@ -104,10 +98,16 @@ while(1)
     if choice==2 | choice==0
         maskFileName = [baseFileNameNOext '_SubCu'  num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
         imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
+
+        csvFileName = [baseFileNameNOext '_SubCu' num2str(iter) '_xy.csv'];
+        csvwrite([output_folder '\' csvFileName],xy)
     
     else
          maskFileName = [baseFileNameNOext '_Muscle' num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
          imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
+
+         csvFileName = [baseFileNameNOext '_Muscle' num2str(iter) '_xy.csv'];
+         csvwrite([output_folder '\' csvFileName],xy)
     end
 
   %  maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
