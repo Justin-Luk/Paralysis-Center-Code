@@ -11,6 +11,9 @@ fontSize = 16;
 % Read in a standard MATLAB gray scale demo image.
 folder = fileparts(which('Screenshot 2022-01-18 150342.png')); % Determine where demo folder is (works with all versions).
 baseFileName = 'Screenshot 2022-01-18 150342.png ';
+%[file, path] = uigetfile('*.*');
+
+%baseFileName = readlines([path file]);
 
 baseFileNameNOext = baseFileName(1:(end-4));
 
@@ -38,7 +41,7 @@ while(1)
 
     imshow(rgbImage, []);
     axis on;
-    title('Original Color Image', 'FontSize', fontSize);
+    title('Original Image', 'FontSize', fontSize);
     set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
     
     hFH = imfreehand(); % Actual line of code to do the drawing.
@@ -54,10 +57,10 @@ while(1)
     title('Original gray scale image', 'FontSize', fontSize);
     
     % Display the freehand mask.
-    subplot(2, 2, 2);
-    imshow(binaryImage);
-    axis on;
-    title('Binary mask of the region', 'FontSize', fontSize);
+   % subplot(2, 2, 2);
+    %imshow(binaryImage);
+   % axis on;
+   % title('Binary mask of the region', 'FontSize', fontSize);
     
     % Get coordinates of the boundary of the freehand drawn region.
     structBoundaries = bwboundaries(binaryImage);
@@ -66,7 +69,7 @@ while(1)
     y = xy(:, 1); % Rows.
     subplot(2, 2, 1); % Plot over original image.
     hold on; % Don't blow away the image.
-    plot(x, y,'k', 'LineWidth', 2);
+    plot(x, y,'g', 'LineWidth', 1);
     drawnow; % Force it to draw immediately.
    
     % Extract the individual red, green, and blue color channels.
@@ -113,12 +116,14 @@ while(1)
   %  maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
    % imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
     axis on;
-    caption = sprintf('Masked black outside the region');
+    caption = sprintf('Your Selection');
     title(caption, 'FontSize', fontSize);
     
     choice = menu('Do you have more drawings?','Yes','No');
     if choice==2 | choice==0
        break;
+    else
+         close all;
     end
 end
 close all;
