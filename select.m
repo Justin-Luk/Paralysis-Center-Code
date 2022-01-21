@@ -97,7 +97,7 @@ while(1)
     totalPix = numPix + numPix2;
     meanval = ((mean2(maskedRgbImage)*(totalPix)))/(numPix)
 
-        choice = menu('Press Subcutaneous tissue Muscle ','Subcutaneous tissue','Muscle');
+        choice = menu('Press Subcutaneous fat Muscle ','Subcutaneous fat','Muscle');
     if choice==2 | choice==0
         maskFileName = [baseFileNameNOext '_SubCu'  num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
         imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
