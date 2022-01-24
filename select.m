@@ -1,3 +1,4 @@
+%% Prepare MATLAB workspace
 if(~isdeployed)
   cd(fileparts(which(mfilename)));
 end
@@ -8,8 +9,8 @@ imtool close all;  % Close all figure windows created by imtool.
 workspace;  % Make sure the workspace panel is showing.
 fontSize = 16;
 
-% Read in a standard MATLAB gray scale demo image.
-folder = fileparts(which('Screenshot 2022-01-18 150342.png')); % Determine where demo folder is (works with all versions).
+%% Select File
+input_folder = fileparts(which('Screenshot 2022-01-18 150342.png')); % Determine where demo folder is (works with all versions).
 baseFileName = 'Screenshot 2022-01-18 150342.png ';
 %[file, path] = uigetfile('*.*');
 
@@ -18,7 +19,7 @@ baseFileName = 'Screenshot 2022-01-18 150342.png ';
 baseFileNameNOext = baseFileName(1:(end-4));
 
 % Get the full filename, with path prepended.
-fullFileName = fullfile(folder, baseFileName);
+fullFileName = fullfile(input_folder, baseFileName);
 % Check if file exists.
 if ~exist(fullFileName, 'file')
   % File doesn't exist -- didn't find it there.  Check the search path for it.
@@ -30,11 +31,19 @@ if ~exist(fullFileName, 'file')
     return;
   end
 end
-rgbImage = imread(fullFileName);
 
+
+%% Read in a image
+rgbImage = imread(fullFileName);  %%(mk) Can be image type grey image or does it have to be RGB?
+
+
+%% Selecte multiple segmentations
 output_folder = 'C:\Users\justi\OneDrive\Documents\MATLAB\EMG/Matlab Ultrasound Pictures';
 
 iter = 0;
+iiST = 1;
+iiMT = 1;
+
 while(1)
     iter = iter + 1;
     T= datetime;
@@ -97,29 +106,32 @@ while(1)
     totalPix = numPix + numPix2;
     meanval = ((mean2(maskedRgbImage)*(totalPix)))/(numPix)
 
-        choice = menu('Press Subcutaneous fat Muscle ','Subcutaneous fat','Muscle');
+    choice = menu('Press Subcutaneous fat Muscle ','Subcutaneous tissue segmentation','Muscle segmentation');
     if choice==2 | choice==0
-        maskFileName = [baseFileNameNOext '_SubCu'  num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
+        maskFileName = [baseFileNameNOext '_SubCu'  num2str(iiST) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
         imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
 
         csvFileName = [baseFileNameNOext '_SubCu' num2str(iter) '_xy.csv'];
         csvwrite([output_folder '\' csvFileName],xy)
-    
+        
+        iiST = iiST + 1;
     else
-         maskFileName = [baseFileNameNOext '_Muscle' num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
+         maskFileName = [baseFileNameNOext '_Muscle' num2str(iiMT) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
          imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
 
          csvFileName = [baseFileNameNOext '_Muscle' num2str(iter) '_xy.csv'];
          csvwrite([output_folder '\' csvFileName],xy)
+         
+         iiMT = iiMT + 1;
     end
 
-  %  maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
+   %  maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
    % imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
     axis on;
     caption = sprintf('Your Selection');
     title(caption, 'FontSize', fontSize);
     
-    choice = menu('Do you have more drawings?','Yes','No');
+    choice = menu('Do you have more segmentations?','Yes','No');
     if choice==2 | choice==0
        break;
     else
