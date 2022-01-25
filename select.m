@@ -1,7 +1,13 @@
+%% Project: Analyze Muscle Ultrasound Image
+%% Luk JH, Krenn MJ
+%% Date:
+%% Copyright:
+
+%% FOLDER AND FILE DEFINITION
 if(~isdeployed)
   cd(fileparts(which(mfilename)));
 end
-
+clc;
 clear;  % Delete all variables.
 close all;  % Close all figure windows except those created by imtool.
 imtool close all;  % Close all figure windows created by imtool.
@@ -9,7 +15,7 @@ workspace;  % Make sure the workspace panel is showing.
 fontSize = 16;
 
 % Read in a standard MATLAB gray scale demo image.
-folder = fileparts(which('Screenshot 2022-01-18 150342.png')); % Determine where demo folder is (works with all versions).
+input_folder = fileparts(which('Screenshot 2022-01-18 150342.png')); % Determine where demo folder is (works with all versions).
 baseFileName = 'Screenshot 2022-01-18 150342.png ';
 %[file, path] = uigetfile('*.*');
 
@@ -18,7 +24,7 @@ baseFileName = 'Screenshot 2022-01-18 150342.png ';
 baseFileNameNOext = baseFileName(1:(end-4));
 
 % Get the full filename, with path prepended.
-fullFileName = fullfile(folder, baseFileName);
+fullFileName = fullfile(input_folder, baseFileName);
 % Check if file exists.
 if ~exist(fullFileName, 'file')
   % File doesn't exist -- didn't find it there.  Check the search path for it.
@@ -30,13 +36,18 @@ if ~exist(fullFileName, 'file')
     return;
   end
 end
-rgbImage = imread(fullFileName);
 
 output_folder = 'C:\Users\justi\OneDrive\Documents\MATLAB\EMG/Matlab Ultrasound Pictures';
 
-iter = 0;
+%% READ IN IMAGE
+rgbImage = imread(fullFileName);
+
+%% DEFINE SEGMENTATIONS
+iterREF = 1;
+iterMSC = 1; 
+
 while(1)
-    iter = iter + 1;
+    %iter = iter + 1;
     T= datetime;
 
     imshow(rgbImage, []);
@@ -90,33 +101,43 @@ while(1)
     subplot(2, 2, 3);
     imshow(maskedRgbImage);
 
+    subplot(1,2,2);
+    [pixelCounts grayLevels] = imhist(maskedRgbImage, 256);
+    bar(grayLevels, pixelCounts);
+    xlim([1 255]);
+
     %Finds the average value of the pixels in the freehanded section.
     %Adjusts for the fact that the background of maskedRgb is black
-    numPix = sum(binaryImage(:));
-    numPix2 = sum(~binaryImage(:));
-    totalPix = numPix + numPix2;
-    meanval = ((mean2(maskedRgbImage)*(totalPix)))/(numPix)
-
-        choice = menu('Press Subcutaneous fat Muscle ','Subcutaneous fat','Muscle');
+        numPix = sum(binaryImage(:));
+        numPix2 = sum(~binaryImage(:));
+        totalPix = numPix + numPix2;
+    choice = menu('Press Subcutaneous fat Muscle ','Subcutaneous segmentation','Muscle segmentation');
     if choice==2 | choice==0
-        maskFileName = [baseFileNameNOext '_SubCu'  num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
+        maskFileName = [baseFileNameNOext '_SubCu'  num2str(iterREF) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
         imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
 
-        csvFileName = [baseFileNameNOext '_SubCu' num2str(iter) '_xy.csv'];
+        csvFileName = [baseFileNameNOext '_SubCu' num2str(iterREF) '_xy.csv'];
         csvwrite([output_folder '\' csvFileName],xy)
-    
+        meanValSub = ((mean2(maskedRgbImage)*(totalPix)))/(numPix);
+        disp(meanValSub)
+        iterREF = iterREF + 1;
     else
-         maskFileName = [baseFileNameNOext '_Muscle' num2str(iter) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
+         maskFileName = [baseFileNameNOext '_Muscle' num2str(iterMSC) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
          imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
 
-         csvFileName = [baseFileNameNOext '_Muscle' num2str(iter) '_xy.csv'];
+         csvFileName = [baseFileNameNOext '_Muscle' num2str(iterMSC) '_xy.csv'];
          csvwrite([output_folder '\' csvFileName],xy)
+
+         meanValMus = ((mean2(maskedRgbImage)*(totalPix)))/(numPix);
+         disp(meanValMus)
+
+         iterMSC = iterMSC + 1;
     end
 
   %  maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
    % imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
     axis on;
-    caption = sprintf('Your Selection');
+   % caption = sprintf('Your Selection');
     title(caption, 'FontSize', fontSize);
     
     choice = menu('Do you have more drawings?','Yes','No');
@@ -126,4 +147,5 @@ while(1)
          close all;
     end
 end
+
 close all;
