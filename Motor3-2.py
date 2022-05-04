@@ -1,13 +1,13 @@
 ## Project: Motor Control
 ## Luk JH, Krenn, MJ
 ## Date: 4/5/22
-import random
 import time
 import cv2
 import cvzone
 from cvzone.HandTrackingModule import HandDetector
 import csv
-import timeit as ti
+import math
+import cmath
 
 # Init
 cap = cv2.VideoCapture(0)
@@ -32,6 +32,13 @@ gx, gy, gz = (0, 0, 0)
 Score = 0
 i = 1
 t=0
+startTime = time.time()
+
+state = ''
+distance = 0
+distance1 = 0
+distance2 = 0
+distance3 = 0
 
 mode = 0
 mode1 = 0
@@ -88,9 +95,6 @@ while True:
         hand1 = hands[0]
         lmList1 = hand1["lmList"]
 
-        #length, info = detector.findDistance(lmList1[8], lmList1[4])
-        # print(length)
-
         cv2.circle(img, (dx, dy), R, color0, cv2.FILLED)
         cv2.circle(img, (ex, ey), R, color1, cv2.FILLED)
         cv2.circle(img, (ax, ay), R, color2, cv2.FILLED)
@@ -143,19 +147,28 @@ while True:
             newMode = mode
             newMode1 = mode1
 
+            if mode == 1:
+                state = 'Open'
+
+            if mode1 == 1:
+                state = 'Closed'
+
+
             curTime = time.time()
             timeDifE = curTime - nowE
             timeDifC = curTime - nowC
 
-            if ax - r < cursor2[0] < ax + r and ay - r < cursor2[1] < ay + r and az - az*0.05 < cursor2[2] < az + az*0.05 and bx - r < cursor3[
-                0] < bx + r and by - r < cursor3[1] < by + r and bz - bz*0.05 < cursor3[2] < bz + bz*0.05 and newMode == 1:
-                img = cv2.putText(img, f'Extended', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                  (0, 250, 0), 2, cv2.LINE_AA)
+            if color4 == (0, 0, 255) and color5 == (0, 0, 255) and newMode1 == 1:
+                img = cv2.putText(img, f'Closed', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1,(250, 250, 250), 2, cv2.LINE_AA)
+                print(timeDifC)
+                mode1 = 0
+                Score += 1
+
+            if color2 == (0, 0, 255) and color3 == (0, 0, 255) and newMode == 1:
+                img = cv2.putText(img, f'Extended', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1,(0, 250, 0), 2, cv2.LINE_AA)
                 print(timeDifE)
                 Score += 1
                 mode = 0
-
-            # beforeClick = time.time()
 
             cursor4 = lmList1[4]
             if fx - r < cursor4[0] < fx + r and fy - r < cursor4[1] < fy + r and fz - 3 < cursor4[2] < fz + 3:
@@ -168,20 +181,6 @@ while True:
                 color5 = (0, 0, 255)
             else:
                 color5 = (0, 255, 0)
-
-            #  clickDifference1 = beforeClick1 - afterClick1
-
-            if fx - r < cursor4[0] < fx + r and fy - r < cursor4[1] < fy + r and fz - fz*0.05 < cursor4[2] < fz + fz*0.05 and gx - r < cursor5[
-                0] < gx + r and gy - r < cursor5[1] < gy + r and gz - gz*0.05 < cursor5[2] < gz + gz*0.05 and newMode1 == 1:
-                img = cv2.putText(img, f'Closed', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                  (250, 250, 250), 2, cv2.LINE_AA)
-                #    afterClick1 = time.time()
-                #    print
-                print(timeDifC)
-                Score += 1
-                mode1 = 0
-
-            #   beforeClick1 = time.time()
 
             if key == ord('r'):
                 Score = 0
@@ -198,20 +197,36 @@ while True:
                 print("Saving")
                 saveMode = 1
 
+            which = 0
+            which1 = 0
+
+            if state == 'Open':
+                which = distance1
+                which1 = distance3
+
+            if state == 'Closed':
+                which = distance2
+                which1 = distance4
+
             if saveMode == 1:
                 with open('C:\\Users\\justi\\OneDrive\\Documents\\MotorControlData.csv','a+', newline='') as f:
-                    fieldnames = ['Time', 'Index x', 'Index y', 'Index z', 'Thumb x', 'Thumb y', 'Thumb z', '', 'Closed Thumb x', 'Closed Thumb y', 'Closed Thumb z','Neutral Thumb x', 'Neutral Thumb y', 'Neutral Thumb z', 'Open Thumb x', 'Open Thumb y', 'Open Thumb z', 'Closed Index x', 'Closed Index y', 'Closed Index z', 'Neutral Index x', 'Neutral Index y', 'Neutral Index z', 'Open Index x', 'Open Index y', 'Open Index z']
+                    fieldnames = ['Time', 'Index x', 'Index y', 'Index z', 'Thumb x', 'Thumb y', 'Thumb z', '', 'Closed Thumb x', 'Closed Thumb y', 'Closed Thumb z','Neutral Thumb x', 'Neutral Thumb y', 'Neutral Thumb z', 'Open Thumb x', 'Open Thumb y', 'Open Thumb z', 'Closed Index x', 'Closed Index y', 'Closed Index z', 'Neutral Index x', 'Neutral Index y', 'Neutral Index z', 'Open Index x', 'Open Index y', 'Open Index z', 'Command', '', 'Distance', 'Distance1']
                     writer = csv.DictWriter(f, fieldnames=fieldnames)
                     if i == 1:
                             writer.writeheader()
                             i = 0
                     xx, yy, zz = lmList1[8]
                     jj, kk, ll = lmList1[4]
+
                     t=time.time_ns()
+                    this = t - startTime*1000000000
 
-                    writer.writerow({'Time':t,'Index x' : xx, 'Index y' : yy, 'Index z' : zz, 'Thumb x' : jj, 'Thumb y' : kk, 'Thumb z': ll, 'Closed Thumb x':fx, 'Closed Thumb y':fy, 'Closed Thumb z':fz, 'Neutral Thumb x':dx, 'Neutral Thumb y':dy, 'Neutral Thumb z':dz, 'Open Thumb x':ax, 'Open Thumb y':ay, 'Open Thumb z':az, 'Closed Index x':gx, 'Closed Index y':gy, 'Closed Index z': gz, 'Neutral Index x': ex, 'Neutral Index y': ey, 'Neutral Index z': ez, 'Open Index x': bx, 'Open Index y': by, 'Open Index z': bz})
+                    distance1 = math.sqrt(abs((xx-fx)^2+(yy-fy)^2+(zz-fz)^2))
+                    distance2 = math.sqrt(abs((xx-gx)^2+(yy-gy)^2+(zz-gz)^2))
+                    distance3 = math.sqrt(abs((jj-ax)^2+(kk-ay)^2+(ll-az)^2))
+                    distance4 = math.sqrt(abs((jj-bx)^2+(kk-by)^2+(ll-bz)^2))
 
-
+                    writer.writerow({'Time':this,'Index x' : xx, 'Index y' : yy, 'Index z' : zz, 'Thumb x' : jj, 'Thumb y' : kk, 'Thumb z': ll, 'Closed Thumb x':fx, 'Closed Thumb y':fy, 'Closed Thumb z':fz, 'Neutral Thumb x':dx, 'Neutral Thumb y':dy, 'Neutral Thumb z':dz, 'Open Thumb x':ax, 'Open Thumb y':ay, 'Open Thumb z':az, 'Closed Index x':gx, 'Closed Index y':gy, 'Closed Index z': gz, 'Neutral Index x': ex, 'Neutral Index y': ey, 'Neutral Index z': ez, 'Open Index x': bx, 'Open Index y': by, 'Open Index z': bz, 'Command': state, 'Distance': which, 'Distance1': which1})
 
             if key == ord('f'):
                 print("Finished Saving")
