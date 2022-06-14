@@ -2,7 +2,6 @@
 %% Luk JH, Krenn MJ
 %% Date:
 %% Copyright:
-
 %% FOLDER AND FILE DEFINITION
 if(~isdeployed)
   cd(fileparts(which(mfilename)));
@@ -15,16 +14,12 @@ workspace;  % Make sure the workspace panel is showing.
 fontSize = 16;
 
 % Read in a standard MATLAB gray scale demo image.
-input_folder = fileparts(which('Screenshot 2022-01-18 150342.png')); % Determine where demo folder is (works with all versions).
-baseFileName = 'Screenshot 2022-01-18 150342.png ';
-%[file, path] = uigetfile('*.*');
-
-%baseFileName = readlines([path file]);
-
-baseFileNameNOext = baseFileName(1:(end-4));
+[baseFileName,intput_path] = uigetfile({'*.jpg'},...
+               'Select a file','C:\Users\user\OneDrive\Documents\MATLAB\EMG\Ultrasounds')
+rgbImage=imread(strcat(intput_path,baseFileName));
 
 % Get the full filename, with path prepended.
-fullFileName = fullfile(input_folder, baseFileName);
+fullFileName = fullfile(intput_path, baseFileName);
 % Check if file exists.
 if ~exist(fullFileName, 'file')
   % File doesn't exist -- didn't find it there.  Check the search path for it.
@@ -37,7 +32,10 @@ if ~exist(fullFileName, 'file')
   end
 end
 
-output_folder = 'C:\Users\justi\OneDrive\Documents\MATLAB\EMG/Matlab Ultrasound Pictures';
+%% GENERATE OUTPUT FOLDER
+baseFileNameNOext = baseFileName(1:(end-4));
+output_path = [intput_path,'FF ',baseFileNameNOext];
+mkdir(output_path);
 
 %% READ IN IMAGE
 rgbImage = imread(fullFileName);
@@ -67,12 +65,6 @@ while(1)
     drawnow;
     title('Original gray scale image', 'FontSize', fontSize);
     
-    % Display the freehand mask.
-   % subplot(2, 2, 2);
-    %imshow(binaryImage);
-   % axis on;
-   % title('Binary mask of the region', 'FontSize', fontSize);
-    
     % Get coordinates of the boundary of the freehand drawn region.
     structBoundaries = bwboundaries(binaryImage);
     xy=structBoundaries{1}; % Get n by 2 array of x,y coordinates.
@@ -90,7 +82,7 @@ while(1)
 
     % Assign colors within each color channel individually.
     redChannel(~binaryImage) = 0;
-    greenChannel(~binaryImage) = 0;
+    greenChannel(~binaryImage) = 255;
     blueChannel(~binaryImage) = 0;
 
     % Recombine separate masked color channels into a single, true color RGB image.
@@ -101,46 +93,33 @@ while(1)
     subplot(2, 2, 3);
     imshow(maskedRgbImage);
 
-    subplot(1,2,2);
-    [pixelCounts grayLevels] = imhist(maskedRgbImage, 256);
-    bar(grayLevels, pixelCounts);
-    xlim([1 255]);
+    
 
-    %Finds the average value of the pixels in the freehanded section.
-    %Adjusts for the fact that the background of maskedRgb is black
-        numPix = sum(binaryImage(:));
-        numPix2 = sum(~binaryImage(:));
-        totalPix = numPix + numPix2;
     choice = menu('Press Subcutaneous fat Muscle ','Subcutaneous segmentation','Muscle segmentation');
-    if choice==2 | choice==0
-        maskFileName = [baseFileNameNOext '_SubCu'  num2str(iterREF) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
-        imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
-
-        csvFileName = [baseFileNameNOext '_SubCu' num2str(iterREF) '_xy.csv'];
-        csvwrite([output_folder '\' csvFileName],xy)
-        meanValSub = ((mean2(maskedRgbImage)*(totalPix)))/(numPix);
-        disp(meanValSub)
-        iterREF = iterREF + 1;
-    else
-         maskFileName = [baseFileNameNOext '_Muscle' num2str(iterMSC) '#' datestr(now,'mm-dd-yyyy HH-MM') '.bmp'];
-         imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
+    if choice==2
+         maskFileName = [baseFileNameNOext '_Muscle' num2str(iterMSC) '.bmp'];
+         imwrite(maskedRgbImage,[output_path '\' maskFileName], 'bmp')
 
          csvFileName = [baseFileNameNOext '_Muscle' num2str(iterMSC) '_xy.csv'];
-         csvwrite([output_folder '\' csvFileName],xy)
-
-         meanValMus = ((mean2(maskedRgbImage)*(totalPix)))/(numPix);
-         disp(meanValMus)
+         csvwrite([output_path '\' csvFileName],xy)
 
          iterMSC = iterMSC + 1;
+    else
+        maskFileName = [baseFileNameNOext '_SubCu'  num2str(iterREF) '.bmp'];
+        imwrite(maskedRgbImage,[output_path '\' maskFileName], 'bmp')
+
+        csvFileName = [baseFileNameNOext '_SubCu' num2str(iterREF) '_xy.csv'];
+        csvwrite([output_path '\' csvFileName],xy)
+        iterREF = iterREF + 1;       
+    
+
     end
 
-  %  maskFileName = [baseFileNameNOext '_Mask' num2str(iter) '.bmp'];
-   % imwrite(maskedRgbImage,[output_folder '\' maskFileName], 'bmp')
     axis on;
-   % caption = sprintf('Your Selection');
+    caption = sprintf('Your Selection');
     title(caption, 'FontSize', fontSize);
     
-    choice = menu('Do you have more drawings?','Yes','No');
+    choice = menu('Select','Draw More','Exit');
     if choice==2 | choice==0
        break;
     else
