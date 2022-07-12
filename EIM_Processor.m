@@ -38,6 +38,8 @@ resistance100 = num(locationOf100,4) % metric 6
 figure(1);
 scatter(freq,phase) 
 title('Phase-Slope')
+xlabel('Frequency') 
+ylabel('Phase') 
 
 limitedRange = locationOf100:locationOf500;
 coeffs = polyfit(freq(limitedRange), phase(limitedRange), 1);
@@ -52,6 +54,8 @@ PhaseSlope = num2str(coeffs(1)) % metric 7
 figure(2);
 scatter(freq,reactance)
 title('Reactance-Slope')
+xlabel('Frequency') 
+ylabel('Reactance') 
 limitedRange = locationOf100:locationOf500;
 
 coeffs1 = polyfit(freq(limitedRange), reactance(limitedRange), 1);
@@ -69,6 +73,8 @@ logResistance = log10(resistance);
 figure(3);
 scatter(logFreq,logResistance) 
 title('Log-Resistance')
+xlabel('Log of Frequency') 
+ylabel('Log of Resistance') 
 
 limitedRange = locationOf50:locationOf500;
 coeffs2 = polyfit(logFreq(limitedRange), logResistance(limitedRange), 1);
