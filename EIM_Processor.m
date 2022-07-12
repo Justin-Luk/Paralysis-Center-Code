@@ -3,8 +3,9 @@
 %% 7/12/22
 
 %% Setup
-i=0;
 
+clc;
+% clear all;
 [file, path] = uigetfile('*.xlsx*');
 
 num = xlsread([path file]);
