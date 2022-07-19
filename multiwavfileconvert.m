@@ -5,26 +5,19 @@
 %% A one time manual input is required on lines 14 & 41
 
 close("all")
+clc;
 
 if(~isdeployed)
 	cd(fileparts(which(mfilename)));
-end
-clc;	
+end	
 
 wavFolder = fullfile('./C:\Users\user\OneDrive\Documents\MATLAB\EMG\wavfolder\'); %change to wherever you store your .wav files
 
 if ~exist(wavFolder, 'dir')
- 	message = sprintf('Please browse to your .wav folder');
-	button = questdlg(message, 'Specify Folder', 'OK', 'Cancel', 'OK');
-	drawnow;	
-	if strcmpi(button, 'Cancel')
-	   return;
-	else
 		wavFolder = uigetdir();
 		if wavFolder == 0
 			return;
-		end
-	end
+        end
 end
 
 filePattern = [wavFolder, '\*.wav'];
