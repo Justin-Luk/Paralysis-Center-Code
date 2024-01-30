@@ -1,3 +1,9 @@
+% Project: Easy Find Angle Measurements
+% Luk JH 
+% Date: 30JAN24
+% The purpose of this script is to centralize processing videos into images
+% with angle measurements
+
 close all;
 clear;
 clc;
@@ -93,7 +99,7 @@ end
 % Callback function to save the figure
 function saveFigure(src, videoName, frameNumber, figureHandle)
     % Save the figure as an image with the specified name
-    saveFileName = [videoName, '_Time_', num2str(frameNumber), '.png'];
+    saveFileName = [videoName, '_Frame_', num2str(frameNumber), '.png'];
     
     % Get the image data from the figure
     frameImage = getframe(figureHandle);

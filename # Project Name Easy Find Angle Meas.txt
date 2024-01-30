@@ -1,0 +1,38 @@
+# Project Name: Easy Find Angle Measurements
+
+The purpose of this script is to centralize processing videos into images
+with angle measurements if desired
+
+## Table of Contents
+
+- [Project Name](#project-name)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
+
+## Description
+
+This program requires a completed compilation video. It is possible that this will not always be the case and at some point, a raw video file could be utilized, if additional functionality is added in the future. The user will be able to navigate through the compilation, frame by frame if desired, and select a frame to measure angles on. Additional lines, arrows, shapes, etc can be added to the chosen frame. Once the user is satisfied, the frame with all edits will be named and saved by hitting the save button. 
+
+
+## Installation
+
+1. Download Matlab (current version R2023b at time of writing)
+2. Download template_process folder which contains the template_process.m file and this readme
+3. Open template_process.m in Matlab and select the run button
+
+## Usage
+
+1. Select Run button
+2. Navigate to & select video of interest
+3. Navigate to frame of interest
+4. Select "Mark Frame"
+5. If desired, add additional lines/shapes by selecting "Insert" 
+6. Change colors/widths by right clicking on lines/shapes if desired. 
+7. Unselect mouse tool if mouse tool is selected (It will look blueish if it is selected)
+8. Adjust angle measurement tool to accurately reflect desired ROM angle
+9. Select "Save" 
+
