@@ -10,7 +10,6 @@ with angle measurements if desired
   - [Description](#description)
   - [Installation](#installation)
   - [Usage](#usage)
-  - [License](#license)
   - [Acknowledgments](#acknowledgments)
 
 ## Description
@@ -20,8 +19,8 @@ This program requires a completed compilation video. It is possible that this wi
 
 ## Installation
 
-1. Download Matlab (current version R2023b at time of writing)
-2. Download template_process folder which contains the template_process.m file and this readme
+1. Download Matlab with image processing toolbox (current version R2023b at time of writing)
+2. Download template_process.m file
 3. Open template_process.m in Matlab and select the run button
 
 ## Usage
@@ -36,3 +35,6 @@ This program requires a completed compilation video. It is possible that this wi
 8. Adjust angle measurement tool to accurately reflect desired ROM angle
 9. Select "Save" 
 
+## Acknowledgments
+
+Angle measurement functionality based on "Create Angle Measurement Tool Using ROI Objects", MathWorks
