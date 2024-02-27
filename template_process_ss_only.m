@@ -39,9 +39,9 @@ markFrameButton = uicontrol('Style', 'pushbutton', 'String', 'Mark Frame', ...
     'Units', 'normalized', 'Position', [0.9 0.01 0.1 0.05], ...
     'Callback', @(src, event) markFrame(videoObj, slider));
 
-% Create a text box to display current frame number
-frameNumberText = uicontrol('Style', 'text', 'String', 'Current Time: 00:00:00', ...
-    'Units', 'normalized', 'Position', [0.02 0.95 0.4 0.03]);
+% Create a text box to display current frame number and time
+frameNumberText = uicontrol('Style', 'text', 'String', 'Frame: 1, Time: 00:00:00:000', ...
+    'Units', 'normalized', 'Position', [0.02 0.95 0.5 0.03]);
 
 % Set the KeyPressFcn for the figure
 set(mainFigure, 'KeyPressFcn', @(fig_obj, event) figureKeyPress(event, slider, videoObj, mainAxes));
@@ -61,24 +61,53 @@ function updateFrame(slider, videoObj, mainAxes)
     milliseconds = floor((currentTime - floor(currentTime)) * 1000);
     currentTimeStrWithMillis = sprintf('%s:%03d', currentTimeStr, milliseconds);
     
+    % Here we add the frame number to the display
+    frameDisplayStr = sprintf('Frame: %d, Time: %s', frameNumber, currentTimeStrWithMillis);
+    
     frameNumberText = findobj(gcf, 'Type', 'uicontrol', 'Style', 'text');
-    set(frameNumberText, 'String', ['Current Time: ', currentTimeStrWithMillis])
+    set(frameNumberText, 'String', frameDisplayStr);
 end
 
-% Simplified Callback function to mark and save the current frame
+% Simplified Callback function to mark and save the current frame with dialogue for custom naming
 function markFrame(videoObj, slider)
     frameNumber = round(slider.Value);
     
     videoObj.CurrentTime = (frameNumber - 1) / videoObj.FrameRate;
     markedFrame = readFrame(videoObj);
     
-    currentTime = videoObj.CurrentTime;
-    currentTimeStr = datestr(seconds(currentTime), 'HH:MM:SS');
-    milliseconds = floor((currentTime - floor(currentTime)) * 1000);
-    currentTimeStrWithMillis = sprintf('%s:%03d', currentTimeStr, milliseconds);
+    % Pop-up dialog for label selection
+    choice = questdlg('Choose the label for the frame:', ...
+        'Frame Label', ...
+        'Approach', 'Reach', 'Approach'); % Default to 'Approach'
+    
+    % Prepare to ask for numeric input after the label selection
+    prompt = {'Enter a number to follow the label:'};
+    dlgtitle = 'Input Number';
+    num_lines = 1;
+    defaultans = {'1'}; % Default number
+    
+    % Handle response for label selection
+    switch choice
+        case 'Approach'
+            label = 'Approach';
+        case 'Reach'
+            label = 'Reach';
+        otherwise
+            disp('No label selected. Frame not saved.');
+            return;
+    end
+    
+    % Ask for numeric input
+    answer = inputdlg(prompt, dlgtitle, num_lines, defaultans);
+    if isempty(answer)
+        disp('Numeric input cancelled. Frame not saved.');
+        return;
+    end
+    % Append numeric input to label
+    label = [label, '_', answer{1}];
     
     [~, videoName, ~] = fileparts(videoObj.Name);
-    saveFileName = [videoName, '_Frame_', num2str(frameNumber), '.png'];
+    saveFileName = sprintf('%s_%s_Frame_%d.png', videoName, label, frameNumber);
     imwrite(markedFrame, saveFileName);
     
     disp(['Frame saved as: ', saveFileName]);
