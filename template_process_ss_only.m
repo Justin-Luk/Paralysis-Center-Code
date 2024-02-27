@@ -43,6 +43,17 @@ markFrameButton = uicontrol('Style', 'pushbutton', 'String', 'Mark Frame', ...
 frameNumberText = uicontrol('Style', 'text', 'String', 'Frame: 1, Time: 00:00:00:000', ...
     'Units', 'normalized', 'Position', [0.02 0.95 0.5 0.03]);
 
+% Add a text input for direct frame jump
+frameJumpInput = uicontrol('Style', 'edit', ...
+    'Units', 'normalized', 'Position', [0.7 0.95 0.1 0.04], ...
+    'String', 'Enter frame number', ...
+    'Callback', @(src, event) jumpToFrame(src, slider, videoObj, mainAxes));
+
+% Add a "Jump to Frame" button
+jumpButton = uicontrol('Style', 'pushbutton', 'String', 'Go to Frame', ...
+    'Units', 'normalized', 'Position', [0.82 0.95 0.08 0.04], ...
+    'Callback', @(src, event) jumpToFrame(frameJumpInput, slider, videoObj, mainAxes));
+
 % Set the KeyPressFcn for the figure
 set(mainFigure, 'KeyPressFcn', @(fig_obj, event) figureKeyPress(event, slider, videoObj, mainAxes));
 
@@ -75,36 +86,31 @@ function markFrame(videoObj, slider)
     videoObj.CurrentTime = (frameNumber - 1) / videoObj.FrameRate;
     markedFrame = readFrame(videoObj);
     
-    % Pop-up dialog for label selection
+    % Pop-up dialog for label selection and number input
     choice = questdlg('Choose the label for the frame:', ...
         'Frame Label', ...
         'Approach', 'Reach', 'Approach'); % Default to 'Approach'
     
-    % Prepare to ask for numeric input after the label selection
-    prompt = {'Enter a number to follow the label:'};
-    dlgtitle = 'Input Number';
-    num_lines = 1;
-    defaultans = {'1'}; % Default number
-    
-    % Handle response for label selection
+    % Handle response
     switch choice
         case 'Approach'
-            label = 'Approach';
+            prompt = {'Enter number for Approach:'};
+            dlgtitle = 'Input';
+            dims = [1 35];
+            definput = {'1'};
+            number = inputdlg(prompt, dlgtitle, dims, definput);
+            label = ['Approach', number{1}];
         case 'Reach'
-            label = 'Reach';
+            prompt = {'Enter number for Reach:'};
+            dlgtitle = 'Input';
+            dims = [1 35];
+            definput = {'1'};
+            number = inputdlg(prompt, dlgtitle, dims, definput);
+            label = ['Reach', number{1}];
         otherwise
             disp('No label selected. Frame not saved.');
             return;
     end
-    
-    % Ask for numeric input
-    answer = inputdlg(prompt, dlgtitle, num_lines, defaultans);
-    if isempty(answer)
-        disp('Numeric input cancelled. Frame not saved.');
-        return;
-    end
-    % Append numeric input to label
-    label = [label, '_', answer{1}];
     
     [~, videoName, ~] = fileparts(videoObj.Name);
     saveFileName = sprintf('%s_%s_Frame_%d.png', videoName, label, frameNumber);
@@ -125,4 +131,18 @@ function figureKeyPress(event, slider, videoObj, mainAxes)
             slider.Value = newValue;
             updateFrame(slider, videoObj, mainAxes);
     end
+end
+
+% Callback function to jump to the specified frame
+function jumpToFrame(frameJumpInput, slider, videoObj, mainAxes)
+    frameNumberStr = get(frameJumpInput, 'String');
+    frameNumber = str2double(frameNumberStr);
+    
+    if isnan(frameNumber) || frameNumber < 1 || frameNumber > videoObj.NumFrames
+        disp('Invalid frame number. Please enter a valid frame number.');
+        return;
+    end
+    
+    slider.Value = frameNumber;
+    updateFrame(slider, videoObj, mainAxes);
 end
