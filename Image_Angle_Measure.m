@@ -25,6 +25,10 @@ figureHandle = figure;
 imshow(img);
 title('Selected Image');
 
+% Initialize global variable to store the latest angle measurement
+global latestAngle;
+latestAngle = 0;
+
 % Call the angle measurement tool for the selected image
 my_angle_measurement_tool(img, figureHandle, filename);  % Pass filename for saving
 
@@ -55,17 +59,20 @@ end
 
 % Function to calculate and display the angle
 function updateAngle(axesHandle, position)
+    global latestAngle;
     v1 = [position(1, 1) - position(2, 1), position(1, 2) - position(2, 2)];
     v2 = [position(3, 1) - position(2, 1), position(3, 2) - position(2, 2)];
     theta = acos(dot(v1, v2) / (norm(v1) * norm(v2)));
     angle_degrees = theta * (180 / pi);
+    latestAngle = angle_degrees; % Update the global variable with the latest angle
     title(axesHandle, sprintf('Angle: %.2f degrees', angle_degrees));
 end
 
 % Callback function to save the figure as an image
 function saveFigure(figureHandle, imageName)
-    % Generate a unique filename for saving
-    saveFileName = strcat('Measured_', erase(imageName, {'*', '/', '?', '"', '<', '>', '|', ':'}), '.png');
+    global latestAngle;
+    % Format the filename to include the angle measurement
+    saveFileName = sprintf('Measured_%s_%.2fDegrees.png', erase(imageName, {'*', '/', '?', '"', '<', '>', '|', ':'}), latestAngle);
     frameImage = getframe(figureHandle);
     imwrite(frameImage.cdata, saveFileName);
     disp(['Figure saved as: ', saveFileName]);
