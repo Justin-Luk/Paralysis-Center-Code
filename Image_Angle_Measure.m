@@ -1,3 +1,7 @@
+% Project: Easy Find Angle Measurements - Stills
+% Luk JH 
+% Date: 02APR24
+
 close all;
 clear;
 clc;
