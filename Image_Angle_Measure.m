@@ -71,8 +71,23 @@ end
 % Callback function to save the figure as an image
 function saveFigure(figureHandle, imageName)
     global latestAngle;
-    % Format the filename to include the angle measurement
-    saveFileName = sprintf('Measured_%s_%.2fDegrees.png', erase(imageName, {'*', '/', '?', '"', '<', '>', '|', ':'}), latestAngle);
+    
+    % Define the options
+    options = {'WE', 'FWS', 'MCP2'};
+    
+    % Ask the user to choose an option
+    [indx, tf] = listdlg('PromptString', {'Select a suffix for the filename:', '', 'WE - Wrist Extension', 'FWS - First Webspace', 'MCP2 - 2nd MCP'}, 'SelectionMode', 'single', 'ListString', options);
+    
+    % Check if the user made a selection
+    if tf
+        selectedOption = options{indx};
+    else
+        disp('User canceled the save operation.');
+        return;
+    end
+    
+    % Format the filename to include the angle measurement and selected option
+    saveFileName = sprintf('%s_%.2f_Degrees_%s.png', erase(imageName, {'*', '.png','/', '?', '"', '<', '>', '|', ':'}), latestAngle, selectedOption);
     frameImage = getframe(figureHandle);
     imwrite(frameImage.cdata, saveFileName);
     disp(['Figure saved as: ', saveFileName]);
